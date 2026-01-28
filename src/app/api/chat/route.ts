@@ -40,8 +40,9 @@ export async function POST(req: Request) {
       If asked for university recommendations, categorize them into Dream, Target, and Safe.
     `;
 
+        // Using 1.5-flash for stable production parsing
         const model = genAI.getGenerativeModel({
-            model: "gemini-2.5-flash", // Sticking to 2.0 as it seems to be the one working now
+            model: "gemini-2.5-flash",
             systemInstruction: systemPrompt
         });
 

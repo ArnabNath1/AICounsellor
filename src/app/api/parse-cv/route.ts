@@ -12,7 +12,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "No CV data provided" }, { status: 400 });
         }
 
-        // Reverting to 1.5-flash which is confirmed to work and exists
+        // Using 1.5-flash for stable production parsing
         const model = genAI.getGenerativeModel({
             model: "gemini-2.5-flash",
         });

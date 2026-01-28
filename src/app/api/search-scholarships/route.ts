@@ -7,7 +7,7 @@ export async function POST(req: Request) {
     try {
         const { query, profile } = await req.json();
 
-        // Using Search Grounding via Gemini 1.5 Pro to fetch real-world data
+        // Using 1.5-flash for stable production parsing
         const model = genAI.getGenerativeModel({
             model: "gemini-2.5-flash",
         });

@@ -27,7 +27,7 @@ export default function UniversitySearch({ onAdd }: { onAdd: (uni: any) => void 
     const searchUniversities = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`http://universities.hipolabs.com/search?name=${query}`);
+            const response = await fetch(`https://universities.hipolabs.com/search?name=${query}`);
             const data = await response.json();
             setResults(data.slice(0, 10)); // Limit to top 10 for performance and UI
         } catch (error) {
