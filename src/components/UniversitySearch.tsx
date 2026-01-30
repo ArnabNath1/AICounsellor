@@ -2,9 +2,15 @@
 import { useState, useEffect } from 'react';
 
 interface University {
+    id?: string;
     name: string;
     country: string;
     web_pages: string[];
+    ranking?: number;
+    cost?: number;
+    acceptanceRate?: number;
+    domain?: string;
+    source?: string;
 }
 
 export default function UniversitySearch({ onAdd }: { onAdd: (uni: any) => void }) {
