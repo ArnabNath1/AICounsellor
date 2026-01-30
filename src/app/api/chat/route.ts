@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
 
-const genAI = new GoogleGenerativeAI("AIzaSyCRvABaDhsySl0e3NGKq1BaGZs_YYmw3Kc");
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENAI_API_KEY || "");
 
 export async function POST(req: Request) {
     try {
@@ -38,9 +38,9 @@ export async function POST(req: Request) {
       
       Be concise, professional, and encouraging. Always provide actionable advice.
       If asked for university recommendations, categorize them into Dream, Target, and Safe.
+      IMPORTANT: Always complete your response fully. Do not truncate mid-sentence.
     `;
 
-        // Using 1.5-flash for stable production parsing
         const model = genAI.getGenerativeModel({
             model: "gemini-2.5-flash",
             systemInstruction: systemPrompt
@@ -53,25 +53,37 @@ export async function POST(req: Request) {
                 parts: [{ text: m.content }],
             }));
 
-        const result = await model.generateContent({
+        const result = await model.generateContentStream({
             contents: chatHistory,
             generationConfig: {
-                maxOutputTokens: 1000,
+                maxOutputTokens: 4096,
+                temperature: 0.7,
             },
         });
 
-        const response = await result.response;
-        const text = response.text();
+        const stream = new ReadableStream({
+            async start(controller) {
+                const encoder = new TextEncoder();
+                try {
+                    for await (const chunk of result.stream) {
+                        const chunkText = chunk.text();
+                        controller.enqueue(encoder.encode(chunkText));
+                    }
+                    controller.close();
+                } catch (error) {
+                    controller.error(error);
+                }
+            },
+        });
 
-        return NextResponse.json({ text });
+        return new Response(stream, {
+            headers: {
+                'Content-Type': 'text/plain; charset=utf-8',
+                'Transfer-Encoding': 'chunked',
+            },
+        });
     } catch (error: any) {
         console.error("Gemini Error:", error);
-        if (error.message?.includes("429")) {
-            return NextResponse.json({
-                error: "The AI Counsellor is currently busy (Quota Exceeded). Please wait a minute and try again.",
-                details: "429 Too Many Requests"
-            }, { status: 429 });
-        }
         return NextResponse.json({
             error: "Failed to get AI response",
             details: error.message

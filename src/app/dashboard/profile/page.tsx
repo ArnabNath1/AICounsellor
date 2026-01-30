@@ -111,12 +111,28 @@ export default function Profile() {
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                                     <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>GPA</label>
-                                    <input className="glass-morph" style={{ padding: '10px', borderRadius: '8px', color: 'white' }} value={formData.gpa || ''} onChange={e => setFormData({ ...formData, gpa: e.target.value })} />
+                                    <input className="glass-morph" style={{ padding: '10px', borderRadius: '8px', color: 'white' }} placeholder="e.g. 3.8/4.0, 8.5/10.0 or 85%" value={formData.gpa || ''} onChange={e => setFormData({ ...formData, gpa: e.target.value })} />
                                 </div>
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                                 <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Degree Major</label>
                                 <input className="glass-morph" style={{ padding: '10px', borderRadius: '8px', color: 'white' }} value={formData.degree || ''} onChange={e => setFormData({ ...formData, degree: e.target.value })} />
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                                    <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Target Degree Level</label>
+                                    <select className="glass-morph" style={{ padding: '10px', borderRadius: '8px', color: 'white' }} value={formData.targetDegree || ''} onChange={e => setFormData({ ...formData, targetDegree: e.target.value })}>
+                                        <option value="">Select</option>
+                                        <option value="Bachelor">Bachelor's</option>
+                                        <option value="Master">Master's</option>
+                                        <option value="PhD">PhD</option>
+                                        <option value="MBA">MBA</option>
+                                    </select>
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                                    <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Desired Field</label>
+                                    <input className="glass-morph" style={{ padding: '10px', borderRadius: '8px', color: 'white' }} value={formData.field || ''} onChange={e => setFormData({ ...formData, field: e.target.value })} placeholder="e.g. Artificial Intelligence" />
+                                </div>
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>

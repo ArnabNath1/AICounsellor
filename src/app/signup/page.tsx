@@ -6,13 +6,40 @@ import { useRouter } from 'next/navigation';
 export default function Signup() {
     const router = useRouter();
     const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // In a real app, we'd call an API here. 
-        // For the prototype, we'll store a mock user in localStorage or just redirect to onboarding.
-        localStorage.setItem('user', JSON.stringify({ name: formData.name, email: formData.email }));
-        router.push('/onboarding');
+        setError('');
+        setLoading(true);
+
+        try {
+            const response = await fetch('/api/auth/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                setError(data.error || 'Signup failed');
+                setLoading(false);
+                return;
+            }
+
+            // Store user and userId in localStorage
+            localStorage.setItem('userId', data.user.id);
+            localStorage.setItem('user', JSON.stringify(data.user));
+            
+            // Redirect to onboarding
+            router.push('/onboarding');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Signup failed');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -20,6 +47,12 @@ export default function Signup() {
             <div className="premium-card" style={{ width: '100%', maxWidth: '400px' }}>
                 <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem', textAlign: 'center' }}>Create Account</h2>
                 <p style={{ color: 'var(--text-muted)', textAlign: 'center', marginBottom: '2rem' }}>Experience the future of study abroad counselling.</p>
+
+                {error && (
+                    <div style={{ background: '#ff4444', color: 'white', padding: '12px', borderRadius: '8px', marginBottom: '1rem', fontSize: '14px' }}>
+                        {error}
+                    </div>
+                )}
 
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -31,6 +64,7 @@ export default function Signup() {
                             style={{ padding: '12px', borderRadius: '8px', color: 'white', border: '1px solid var(--glass-border)' }}
                             value={formData.name}
                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            disabled={loading}
                         />
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -42,6 +76,7 @@ export default function Signup() {
                             style={{ padding: '12px', borderRadius: '8px', color: 'white', border: '1px solid var(--glass-border)' }}
                             value={formData.email}
                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                            disabled={loading}
                         />
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -53,11 +88,12 @@ export default function Signup() {
                             style={{ padding: '12px', borderRadius: '8px', color: 'white', border: '1px solid var(--glass-border)' }}
                             value={formData.password}
                             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                            disabled={loading}
                         />
                     </div>
 
-                    <button type="submit" className="btn-primary" style={{ marginTop: '1rem', justifyContent: 'center' }}>
-                        Start Onboarding
+                    <button type="submit" className="btn-primary" style={{ marginTop: '1rem', justifyContent: 'center' }} disabled={loading}>
+                        {loading ? 'Creating account...' : 'Start Onboarding'}
                     </button>
                 </form>
 

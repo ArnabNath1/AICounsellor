@@ -15,12 +15,13 @@ export default function AICounsellor() {
         }
     }, [messages]);
 
-    const handleSend = async () => {
-        if (!input.trim() || loading) return;
+    const handleSend = async (customMessage?: string) => {
+        const messageText = customMessage || input;
+        if (!messageText.trim() || loading) return;
 
-        const userMessage = { role: 'user', content: input };
+        const userMessage = { role: 'user', content: messageText };
         setMessages(prev => [...prev, userMessage]);
-        setInput('');
+        if (!customMessage) setInput('');
         setLoading(true);
 
         try {
@@ -31,12 +32,37 @@ export default function AICounsellor() {
                 body: JSON.stringify({ messages: [...messages, userMessage], profile }),
             });
 
-            const data = await response.json();
             if (!response.ok) {
-                setMessages(prev => [...prev, { role: 'assistant', content: data.error || "I'm having trouble connecting right now. Please try again." }]);
-            } else {
-                setMessages(prev => [...prev, { role: 'assistant', content: data.text }]);
+                const errorData = await response.json();
+                setMessages(prev => [...prev, { role: 'assistant', content: errorData.error || "I'm having trouble connecting right now." }]);
+                setLoading(false);
+                return;
             }
+
+            // Create a temporary message for the stream
+            setMessages(prev => [...prev, { role: 'assistant', content: "" }]);
+
+            const reader = response.body?.getReader();
+            const decoder = new TextDecoder();
+
+            if (!reader) throw new Error("No reader found");
+
+            let accumulatedText = "";
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value, { stream: true });
+                accumulatedText += chunk;
+
+                // Update the last message (the one we just added) with the new text
+                setMessages(prev => {
+                    const newMessages = [...prev];
+                    newMessages[newMessages.length - 1] = { role: 'assistant', content: accumulatedText };
+                    return newMessages;
+                });
+            }
+
         } catch (error) {
             console.error(error);
             setMessages(prev => [...prev, { role: 'assistant', content: "Sorry, I encountered an error. Please try again." }]);
@@ -69,7 +95,7 @@ export default function AICounsellor() {
                             {m.content}
                         </div>
                     ))}
-                    {loading && (
+                    {loading && messages[messages.length - 1].content === "" && (
                         <div style={{ alignSelf: 'flex-start', padding: '1rem', color: 'var(--text-muted)' }}>
                             Thinking...
                         </div>
@@ -88,14 +114,14 @@ export default function AICounsellor() {
                             onChange={e => setInput(e.target.value)}
                             onKeyDown={e => e.key === 'Enter' && handleSend()}
                         />
-                        <button className="btn-primary" onClick={handleSend} disabled={loading}>
+                        <button className="btn-primary" onClick={() => handleSend()} disabled={loading}>
                             Send
                         </button>
                     </div>
                     <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                        <button className="btn-secondary" style={{ padding: '6px 12px', fontSize: '11px' }}>Recommend Universities</button>
-                        <button className="btn-secondary" style={{ padding: '6px 12px', fontSize: '11px' }}>Explain My Gaps</button>
-                        <button className="btn-secondary" style={{ padding: '6px 12px', fontSize: '11px' }}>What's my next step?</button>
+                        <button className="btn-secondary" style={{ padding: '6px 12px', fontSize: '11px' }} onClick={() => handleSend("Can you recommend some universities based on my profile?")}>Recommend Universities</button>
+                        <button className="btn-secondary" style={{ padding: '6px 12px', fontSize: '11px' }} onClick={() => handleSend("Based on my target universities, what are the gaps in my profile?")}>Explain My Gaps</button>
+                        <button className="btn-secondary" style={{ padding: '6px 12px', fontSize: '11px' }} onClick={() => handleSend("What should be my next step in this journey?")}>What's my next step?</button>
                     </div>
                 </div>
             </div>

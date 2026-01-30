@@ -33,6 +33,12 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# Local database files (not used - using Turso only)
+*.db
+*.sqlite
+*.sqlite3
+/drizzle
+
 # vercel
 .vercel
 

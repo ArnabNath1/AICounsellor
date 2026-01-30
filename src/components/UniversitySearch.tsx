@@ -27,11 +27,21 @@ export default function UniversitySearch({ onAdd }: { onAdd: (uni: any) => void 
     const searchUniversities = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`https://universities.hipolabs.com/search?name=${query}`);
+            console.log(`Fetching: /api/search-universities?query=${encodeURIComponent(query)}`);
+            const response = await fetch(`/api/search-universities?query=${encodeURIComponent(query)}`);
+            console.log("Response status:", response.status);
+            
             const data = await response.json();
-            setResults(data.slice(0, 10)); // Limit to top 10 for performance and UI
+            console.log("Search results:", data);
+            
+            if (Array.isArray(data)) {
+                setResults(data);
+            } else {
+                setResults([]);
+            }
         } catch (error) {
             console.error("Search failed:", error);
+            setResults([]);
         } finally {
             setLoading(false);
         }
@@ -90,11 +100,14 @@ export default function UniversitySearch({ onAdd }: { onAdd: (uni: any) => void 
                                 className="btn-primary"
                                 style={{ padding: '8px 16px', fontSize: '12px' }}
                                 onClick={() => onAdd({
-                                    id: `hipo-${uni.name}-${uni.country}`,
+                                    id: uni.id || `${uni.name}-${uni.country}`,
                                     name: uni.name,
                                     country: uni.country,
-                                    domain: uni.web_pages[0],
-                                    source: 'external'
+                                    ranking: uni.ranking,
+                                    cost: uni.cost,
+                                    acceptanceRate: uni.acceptanceRate,
+                                    domain: uni.domain || (uni.web_pages && uni.web_pages[0]) || undefined,
+                                    source: uni.source || 'search'
                                 })}
                             >
                                 + Shortlist

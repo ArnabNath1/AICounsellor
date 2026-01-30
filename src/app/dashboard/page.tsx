@@ -177,7 +177,7 @@ export default function Dashboard() {
                             <div style={{ fontSize: '13px', color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: '1.5rem' }}>
                                 {profile.scholarshipTargets || 'Define your targets in onboarding or profile settings.'}
                             </div>
-                            <button className="btn-secondary" style={{ width: '100%', fontSize: '12px', borderColor: 'rgba(16, 185, 129, 0.3)' }}>Find More Scholarships</button>
+                            <button className="btn-secondary" style={{ width: '100%', fontSize: '12px', borderColor: 'rgba(16, 185, 129, 0.3)' }} onClick={() => router.push('/dashboard/scholarships')}>Find More Scholarships</button>
                         </div>
                     </section>
 
@@ -224,16 +224,24 @@ export default function Dashboard() {
                                     </div>
                                 </div>
                             ))}
-                            <button style={{
-                                marginTop: '0.5rem',
-                                background: 'transparent',
-                                border: '1px dashed var(--glass-border)',
-                                borderRadius: '10px',
-                                padding: '10px',
-                                color: 'var(--text-muted)',
-                                fontSize: '13px',
-                                cursor: 'pointer'
-                            }}>
+                            <button
+                                onClick={() => {
+                                    const title = prompt("Enter task title:");
+                                    if (title) {
+                                        setTasks([...tasks, { id: Date.now(), title, status: 'Pending', category: 'Manual' }]);
+                                    }
+                                }}
+                                style={{
+                                    marginTop: '0.5rem',
+                                    background: 'transparent',
+                                    border: '1px dashed var(--glass-border)',
+                                    borderRadius: '10px',
+                                    padding: '10px',
+                                    color: 'var(--text-muted)',
+                                    fontSize: '13px',
+                                    cursor: 'pointer'
+                                }}
+                            >
                                 + Add Task
                             </button>
                         </div>
